@@ -46,6 +46,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		p.createShot(keys, &BList_p, count);
 		BList_p.calc(count);
 		Enemys.collision_with_PlayerShot(&BList_p);
+		Enemys.update(count);
 
 
 		ScreenFlip();//裏画面を表画面に反映
@@ -144,21 +145,26 @@ void Player::createShot(KeyInput keys, BulletList* BList_p, int count, int inter
 }
 
 void Enemy::update() {
-	//まだ空っぽ
-	x += v;//x方向の移動
-	y += v;//y方向の移動
+	int direction;//移動方向
+	direction = GetRand(4);//乱数を取得
+	switch (direction) {
+	case 0:
+		x += v; //右へ移動
+		break;
+	case 1:
+		x -= v; //左へ移動
+		break;
+	case 2:
+		y += v; //下へ移動
+		break;
+	case 3:
+		y -= v; //上へ移動
+		break;
+	}
 
 	if (HP > maxHP) {//現在HPが最大HPを超えていたら直す
-		HP = maxHP;//進める
+		HP = maxHP;
 	}
-	/*
-	if (hp > 0 && isInWall(itr->e.pos.x, itr->e.pos.y, 100)) {//生きているかつ範囲内にいる場合
-		itr = itr->next;//進める
-	}
-	else {//hpが0か負または画面の範囲外にいるとき
-		itr = delEnemy(itr);//該当の敵をElistから消す
-	}
-	*/
 }
 void Enemy::draw(int count) {
 	int frame = (count / 10) % frameSum; // 10countごとにコマが変化
@@ -214,6 +220,10 @@ void deleteAllNode(T** head, T** tail) {
 	}
 	*head = NULL;//ヌル
 	*tail = NULL;//ヌル
+}
+template<typename T>
+int isInSquare(T* itr, int min_x, int min_y, int max_x, int max_y) {
+
 }
 
 void BulletList::draw() {
@@ -271,6 +281,13 @@ void EnemyList::update(int count) {
 	while (itr != NULL) {//末尾までポインタを進める
 		itr->data.update();//更新
 		itr = itr->next;//進める
+		/*
+		if (itr->data.HP > 0 && isInSquare(itr, MIN_X, MIN_Y, MAX_X, MAX_Y)) {//生きているかつ範囲内にいる場合
+			itr = itr->next;//進める
+		}
+		else {//hpが0か負または画面の範囲外にいるとき
+			itr = del(itr);//該当の敵をリストから消す
+		}*/
 	}
 }
 void EnemyList::add(Enemy b) {
