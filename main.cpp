@@ -18,7 +18,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	Graphic* G_player = new Graphic("player.png", 69, 120, 3, 3);
 	Graphic* G_fairy = new Graphic("fairy.png", 168, 150, 2, 2);
 	Player p(CX, CY + 100, 4, G_player, 3);
-	Enemy fairy1(MIN_X, CY - 100, 4, G_fairy, 0, 2, 1, 1, 2, 1);
+	Enemy fairy1(CX - 200, 0, 4, G_fairy, 0, 2, 1, 1, 4, 1);
 	Enemy fairy2(MAX_X, CY - 50, 4, G_fairy, 2, 2, 20, 20, 3, 2);
 	EnemyList Enemys;//敵リスト
 
@@ -48,6 +48,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		BList_e.calc(count);
 		Enemys.collision_with_PlayerShot(&BList_p);
 		Enemys.update(&BList_e, p, count);
+		p.collision_with_EnemyShot(&BList_e);
 
 		if (count % 30 == 0)
 			Enemys.add(fairy1);
@@ -178,11 +179,17 @@ void Enemy::update() {
 	case 3://左へ移動
 		x -= v;
 		break;
+	case 4://円周上を動く
+		double theta = PI * (180 - t) / 180; //角度シータ
+		x = 200.0 * cos(theta) + CX;
+		y = 100.0 * sin(theta);
+		break;
 	}
 
 	if (HP > maxHP) {//現在HPが最大HPを超えていたら直す
 		HP = maxHP;
 	}
+	t++;//時間経過
 }
 void Enemy::draw(int count) {
 	int frame = (count / 10) % frameSum; // 10countごとにコマが変化
@@ -296,6 +303,7 @@ void BulletList::calc(int count) {
 			itr->y += 10 * sin(rad);//y方向の移動
 			break;
 		}
+		itr->t++;//時間経過
 
 		//範囲チェック
 		if (Btwn(-20, itr->x, MAX_X + 20) && Btwn(-20, itr->y, MAX_Y + 20)) {//画面内にいるとき
@@ -304,7 +312,6 @@ void BulletList::calc(int count) {
 		else {//画面外+20にいるとき
 			itr = del(itr);//該当の弾を消す
 		}
-
 	}
 }
 void BulletList::add(Bullet b) {
@@ -375,5 +382,20 @@ void EnemyList::collision_with_PlayerShot(BulletList* b) {
 			itrE = itrE->next;//それ以外ならそのまま進める
 		}
 		itrB = b->getHead();
+	}
+}
+
+void Player::collision_with_EnemyShot(BulletList* b) {
+	Bullet* itrB = b->getHead();//弾リストの先頭ポインタ
+	while (itrB != NULL) {//末尾までポインタを進める
+		if ((Btwn(x - graph->size_x, itrB->x + itrB->r, x + graph->size_x) ||
+			Btwn(x - graph->size_x, itrB->x - itrB->r, x + graph->size_x)) &&
+			(Btwn(y - graph->size_y, itrB->y + itrB->r, y + graph->size_y) ||
+				Btwn(y - graph->size_y, itrB->y - itrB->r, y + graph->size_y))) {
+			itrB = b->del(itrB);//当たっていたら弾を消す
+		}
+		else {
+			itrB = itrB->next;//進める
+		}
 	}
 }

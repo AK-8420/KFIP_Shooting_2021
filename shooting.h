@@ -61,6 +61,8 @@ typedef struct BulletData {
 	int r; //半径
 	int color;//色
 	int ptn;//動きパターンID
+	double v = 0;//現在速度
+	int t = 0;//経過時間
 	struct BulletData* before;//前のデータへのポインタ
 	struct BulletData* next;//次のデータへのポインタ
 }Bullet;
@@ -92,6 +94,7 @@ public:
 	int index;	//画像ハンドルのインデックス
 	double angle = 0; //画像の回転角度(rad)
 	int HP, maxHP;//maxHPはHPの最大値
+	int t = 0;//経過時間
 
 	//コンストラクタ
 	Character(int X, int Y, int V, Graphic* Image, int firstIndex = 0, int hp = 1, int maxhp = 1);
@@ -110,6 +113,8 @@ public:
 	void draw(KeyInput keys, int count);
 	// 自弾の追加
 	void createShot(KeyInput keys, BulletList* BList_p, int count, int interval = 5);
+	//敵の弾との衝突処理
+	void collision_with_EnemyShot(BulletList* b);
 };
 
 //敵
