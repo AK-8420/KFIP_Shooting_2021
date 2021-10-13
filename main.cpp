@@ -19,7 +19,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	Graphic* G_fairy = new Graphic("fairy.png", 168, 150, 2, 2);
 	Player p(CX, CY + 100, 4, G_player, 3);
 	Enemy fairy1(CX - 200, 0, 4, G_fairy, 0, 2, 1, 1, 4, 1);
-	Enemy fairy2(MAX_X, CY - 50, 4, G_fairy, 2, 2, 20, 20, 3, 2);
+	Enemy fairy2(MIN_X + GetRand(MAX_X - MIN_X), 0, 300, G_fairy, 2, 2, 20, 20, 5, 2);
 	EnemyList Enemys;//敵リスト
 
 	BulletList BList_p;//プレイヤーの弾リスト
@@ -179,11 +179,17 @@ void Enemy::update() {
 	case 3://左へ移動
 		x -= v;
 		break;
-	case 4://円周上を動く
+	case 4:{//円周上を動く
 		double theta = PI * (180 - t) / 180; //角度シータ
 		x = 200.0 * cos(theta) + CX;
 		y = 100.0 * sin(theta);
 		break;
+		}
+	case 5:{//下向きジャンプ
+		double ts = (double)t / 60; // 経過フレーム数tを秒に変換
+		y = (double)v * ts - 0.5 * v / 1.5 * pow(ts, 2);
+		break;
+		}
 	}
 
 	if (HP > maxHP) {//現在HPが最大HPを超えていたら直す
