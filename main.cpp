@@ -19,7 +19,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	Graphic* G_fairy = new Graphic("fairy.png", 168, 150, 2, 2);
 	Player p(CX, CY + 100, 4, G_player, 3);
 	Enemy fairy1(CX - 200, 0, 4, G_fairy, 0, 2, 1, 1, 4, 1);
-	Enemy fairy2(MIN_X + GetRand(MAX_X - MIN_X), 0, 300, G_fairy, 2, 2, 20, 20, 5, 2);
+	Enemy fairy2(MIN_X + GetRand(MAX_X - MIN_X), 0, 300, G_fairy, 2, 2, 20, 20, 5, 3);
 	EnemyList Enemys;//敵リスト
 
 	BulletList BList_p;//プレイヤーの弾リスト
@@ -145,8 +145,8 @@ void Player::createShot(KeyInput keys, BulletList* BList_p, int count, int inter
 	if (!keys.nowKeys[KEY_INPUT_SPACE]) return;//SPACEキーを押していなかったらNG
 	if (!((count - sCount) % interval == 0)) return;//インターバル内だったらNG
 	//以下はショットの決定と生成
-	Bullet b1 = { x - 10, y, 270, 3 ,COLOR::white, 0 };//弾データを用意
-	Bullet b2 = { x + 10, y, 270, 3 ,COLOR::white, 0 };//弾データを用意
+	Bullet b1 = { x - 10, y, 270, 3 ,COLOR::white, 0, 5 };//弾データを用意
+	Bullet b2 = { x + 10, y, 270, 3 ,COLOR::white, 0, 5 };//弾データを用意
 	BList_p->add(b1);//弾を追加
 	BList_p->add(b2);//弾を追加
 }
@@ -208,17 +208,25 @@ void Enemy::createShot(BulletList* BList_e, Player p, int count) {
 	case 1: //プレイヤーの方向にまっすぐ向かう弾(青)
 		if (count % 30 == 0) {
 			double rad = atan2(p.y - y, p.x - x);
-			rad = 180 * rad / PI;//弾からプレイヤーへの角度を度数法で計算
-			Bullet b = { x, y, rad, 3 ,COLOR::blue, shotID };//弾データを用意
+			rad = rad * 180 / PI;//弾からプレイヤーへの角度を度数法で計算
+			Bullet b = { x, y, rad, 3 ,COLOR::blue, shotID, 3 };//弾データを用意
 			BList_e->add(b);//弾を追加
 		}
 		break;
 	case 2: //プレイヤーの方向にまっすぐ向かう弾(赤)
 		if (count % 60 == 0) {
 			double rad = atan2(p.y - y, p.x - x);
-			rad = 180 * rad / PI;//弾からプレイヤーへの角度を度数法で計算
-			Bullet b = { x, y, rad, 3 ,COLOR::red, shotID };//弾データを用意
+			rad = rad * 180 / PI;//弾からプレイヤーへの角度を度数法で計算
+			Bullet b = { x, y, rad, 3 ,COLOR::red, shotID, 10 };//弾データを用意
 			BList_e->add(b);//弾を追加
+		}
+		break;
+	case 3: // 1秒後に放射線状に放たれる
+		if (t == 60) {
+			for (int i = 0; i < 360; i += 10) {
+				Bullet b = { x, y, i, 3 ,COLOR::red, shotID, 5 };//弾データを用意
+				BList_e->add(b);//弾を追加
+			}
 		}
 		break;
 	}
@@ -297,16 +305,11 @@ void BulletList::calc(int count) {
 
 		switch (itr->ptn) {
 		case 0://通常弾
-			itr->x += 5 * cos(rad);//x方向の移動
-			itr->y += 5 * sin(rad);//y方向の移動
-			break;
 		case 1://プレイヤーに向かう弾（遅い）
-			itr->x += 3 * cos(rad);//x方向の移動
-			itr->y += 3 * sin(rad);//y方向の移動
-			break;
 		case 2://プレイヤーに向かう弾（速い）
-			itr->x += 10 * cos(rad);//x方向の移動
-			itr->y += 10 * sin(rad);//y方向の移動
+		case 3://放射線状に放たれる弾
+			itr->x += itr->v * cos(rad);//x方向の移動
+			itr->y += itr->v * sin(rad);//y方向の移動
 			break;
 		}
 		itr->t++;//時間経過
