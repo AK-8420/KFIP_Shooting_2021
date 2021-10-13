@@ -222,8 +222,14 @@ void deleteAllNode(T** head, T** tail) {
 	*tail = NULL;//ヌル
 }
 template<typename T>
-int isInSquare(T* itr, int min_x, int min_y, int max_x, int max_y) {
-
+int isInSquare(T chara, int min_x, int min_y, int max_x, int max_y) {
+	if ((Btwn(min_x, chara.x + chara.graph->size_x, max_x) || Btwn(min_x, chara.x - chara.graph->size_x, max_x)) &&
+		(Btwn(min_y, chara.y + chara.graph->size_y, max_y) || Btwn(min_y, chara.y - chara.graph->size_y, max_y))) {
+		return 1;//範囲内
+	}
+	else {
+		return 0;//範囲外
+	}
 }
 
 void BulletList::draw() {
@@ -280,14 +286,12 @@ void EnemyList::update(int count) {
 	ENode* itr = head;//先頭ポインタから始める
 	while (itr != NULL) {//末尾までポインタを進める
 		itr->data.update();//更新
-		itr = itr->next;//進める
-		/*
-		if (itr->data.HP > 0 && isInSquare(itr, MIN_X, MIN_Y, MAX_X, MAX_Y)) {//生きているかつ範囲内にいる場合
+		if (isInSquare(itr->data, MIN_X, MIN_Y, MAX_X, MAX_Y)) {//画面内にいる場合
 			itr = itr->next;//進める
 		}
-		else {//hpが0か負または画面の範囲外にいるとき
+		else {//画面の範囲外にいるとき
 			itr = del(itr);//該当の敵をリストから消す
-		}*/
+		}
 	}
 }
 void EnemyList::add(Enemy b) {

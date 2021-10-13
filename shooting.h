@@ -163,4 +163,4 @@ template<typename T>
 void deleteAllNode(T** head, T** tail);//head-tailのリストのノードをすべて消去
 
 template<typename T>
-int isInSquare(T* itr, int min_x, int min_y, int max_x, int max_y);//キャラクターが四角形の範囲の中にいるかチェック
+int isInSquare(T chara, int min_x, int min_y, int max_x, int max_y);//キャラクターが四角形の範囲の中にいるかチェック
