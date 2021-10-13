@@ -119,15 +119,17 @@ private:
 	int frameSum;  //アニメーションの総コマ数
 public:
 	int moveID;//移動パターンID
-	//ここに攻撃パターン属性（未実装）
+	int shotID;//攻撃パターンID
 
-	Enemy(int X, int Y, int V, Graphic* Image, int Index_min = 0, int FrameSum = 1, int hp = 1, int maxhp = 1, int moveId = 0) :Character(X, Y, V, Image, Index_min, hp, maxhp) {
+	Enemy(int X, int Y, int V, Graphic* Image, int Index_min = 0, int FrameSum = 1, int hp = 1, int maxhp = 1, int moveId = 0, int shotId = 1) :Character(X, Y, V, Image, Index_min, hp, maxhp) {
 		index_min = Index_min;
 		frameSum = FrameSum;
 		moveID = moveId;
+		shotID = shotId;
 	}
 	void update();//更新
 	void draw(int count);//描画
+	void createShot(BulletList* BList_e, Player p, int count);// 弾の追加
 };
 
 //敵リストのノード
@@ -143,7 +145,7 @@ private:
 	ENode* tail = NULL; //リストの末尾を指すポインタ
 public:
 	void draw(int count);//描画
-	void update(int count);//更新
+	void update(BulletList* BList_e, Player p, int count);//更新
 	void add(Enemy b);//リストの末尾に追加
 	ENode* del(ENode* target);//削除 (戻値：次を指すポインタ)
 	void delAll();//リスト全体を消去

@@ -18,11 +18,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	Graphic* G_player = new Graphic("player.png", 69, 120, 3, 3);
 	Graphic* G_fairy = new Graphic("fairy.png", 168, 150, 2, 2);
 	Player p(CX, CY + 100, 4, G_player, 3);
-	Enemy fairy1(MIN_X, CY - 100, 4, G_fairy, 0, 2, 1, 1, 2);
-	Enemy fairy2(MAX_X, CY - 50, 4, G_fairy, 2, 2, 20, 20, 3);
+	Enemy fairy1(MIN_X, CY - 100, 4, G_fairy, 0, 2, 1, 1, 2, 1);
+	Enemy fairy2(MAX_X, CY - 50, 4, G_fairy, 2, 2, 20, 20, 3, 2);
 	EnemyList Enemys;//敵リスト
 
 	BulletList BList_p;//プレイヤーの弾リスト
+	BulletList BList_e;//敵の弾リスト
 
     /*メインループ*/
 	while (1) {
@@ -36,6 +37,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		/*以下に描画処理を書く*/
 		p.draw(keys, count);
 		BList_p.draw();
+		BList_e.draw();
 		Enemys.draw(count);
 
 
@@ -43,8 +45,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		p.update(keys);
 		p.createShot(keys, &BList_p, count);
 		BList_p.calc(count);
+		BList_e.calc(count);
 		Enemys.collision_with_PlayerShot(&BList_p);
-		Enemys.update(count);
+		Enemys.update(&BList_e, p, count);
 
 		if (count % 30 == 0)
 			Enemys.add(fairy1);
@@ -187,7 +190,26 @@ void Enemy::draw(int count) {
 	index = index_min + frame;
 	graph->draw(x, y, index, angle);
 }
-
+void Enemy::createShot(BulletList* BList_e, Player p, int count) {
+	switch (shotID) {
+	case 1: //プレイヤーの方向にまっすぐ向かう弾(青)
+		if (count % 30 == 0) {
+			double rad = atan2(p.y - y, p.x - x);
+			rad = 180 * rad / PI;//弾からプレイヤーへの角度を度数法で計算
+			Bullet b = { x, y, rad, 3 ,COLOR::blue, shotID };//弾データを用意
+			BList_e->add(b);//弾を追加
+		}
+		break;
+	case 2: //プレイヤーの方向にまっすぐ向かう弾(赤)
+		if (count % 60 == 0) {
+			double rad = atan2(p.y - y, p.x - x);
+			rad = 180 * rad / PI;//弾からプレイヤーへの角度を度数法で計算
+			Bullet b = { x, y, rad, 3 ,COLOR::red, shotID };//弾データを用意
+			BList_e->add(b);//弾を追加
+		}
+		break;
+	}
+}
 
 int Btwn(int p1, int p, int p2) {
 	if (p2 > p1 && (p1 <= p) && (p <= p2))
@@ -265,6 +287,14 @@ void BulletList::calc(int count) {
 			itr->x += 5 * cos(rad);//x方向の移動
 			itr->y += 5 * sin(rad);//y方向の移動
 			break;
+		case 1://プレイヤーに向かう弾（遅い）
+			itr->x += 3 * cos(rad);//x方向の移動
+			itr->y += 3 * sin(rad);//y方向の移動
+			break;
+		case 2://プレイヤーに向かう弾（速い）
+			itr->x += 10 * cos(rad);//x方向の移動
+			itr->y += 10 * sin(rad);//y方向の移動
+			break;
 		}
 
 		//範囲チェック
@@ -297,10 +327,11 @@ void EnemyList::draw(int count) {
 		itr = itr->next;//進める
 	}
 }
-void EnemyList::update(int count) {
+void EnemyList::update(BulletList* BList_e, Player p, int count) {
 	ENode* itr = head;//先頭ポインタから始める
 	while (itr != NULL) {//末尾までポインタを進める
 		itr->data.update();//更新
+		itr->data.createShot(BList_e, p, count);//弾生成
 		if (isInSquare(itr->data, MIN_X, MIN_Y, MAX_X, MAX_Y)) {//画面内にいる場合
 			itr = itr->next;//進める
 		}
