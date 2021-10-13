@@ -118,12 +118,13 @@ private:
 	int index_min; //画像のインデックス範囲の最小値
 	int frameSum;  //アニメーションの総コマ数
 public:
-	//ここに移動パターン属性（未実装）
+	int moveID;//移動パターンID
 	//ここに攻撃パターン属性（未実装）
 
-	Enemy(int X, int Y, int V, Graphic* Image, int Index_min = 0, int FrameSum = 1, int hp = 1, int maxhp = 1) :Character(X, Y, V, Image, Index_min, hp, maxhp) {
+	Enemy(int X, int Y, int V, Graphic* Image, int Index_min = 0, int FrameSum = 1, int hp = 1, int maxhp = 1, int moveId = 0) :Character(X, Y, V, Image, Index_min, hp, maxhp) {
 		index_min = Index_min;
 		frameSum = FrameSum;
+		moveID = moveId;
 	}
 	void update();//更新
 	void draw(int count);//描画

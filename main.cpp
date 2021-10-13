@@ -18,11 +18,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	Graphic* G_player = new Graphic("player.png", 69, 120, 3, 3);
 	Graphic* G_fairy = new Graphic("fairy.png", 168, 150, 2, 2);
 	Player p(CX, CY + 100, 4, G_player, 3);
-	Enemy fairy1(CX - 100, CY - 100, 4, G_fairy, 0, 2);
-	Enemy fairy2(CX + 100, CY - 100, 4, G_fairy, 2, 2, 20, 20);
+	Enemy fairy1(MIN_X, CY - 100, 4, G_fairy, 0, 2, 1, 1, 2);
+	Enemy fairy2(MAX_X, CY - 50, 4, G_fairy, 2, 2, 20, 20, 3);
 	EnemyList Enemys;//敵リスト
-	Enemys.add(fairy1);//青妖精の追加
-	Enemys.add(fairy2);//赤妖精の追加
 
 	BulletList BList_p;//プレイヤーの弾リスト
 
@@ -47,6 +45,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		BList_p.calc(count);
 		Enemys.collision_with_PlayerShot(&BList_p);
 		Enemys.update(count);
+
+		if (count % 30 == 0)
+			Enemys.add(fairy1);
+		if (count % 60 == 0)
+			Enemys.add(fairy2);
 
 
 		ScreenFlip();//裏画面を表画面に反映
@@ -145,20 +148,32 @@ void Player::createShot(KeyInput keys, BulletList* BList_p, int count, int inter
 }
 
 void Enemy::update() {
-	int direction;//移動方向
-	direction = GetRand(4);//乱数を取得
-	switch (direction) {
+	switch (moveID) {
 	case 0:
-		x += v; //右へ移動
 		break;
-	case 1:
-		x -= v; //左へ移動
+	case 1:// ランダムな4方向移動
+		int direction;//移動方向
+		direction = GetRand(4);//乱数を取得
+		switch (direction) {
+		case 0:
+			x += v; //右へ移動
+			break;
+		case 1:
+			x -= v; //左へ移動
+			break;
+		case 2:
+			y += v; //下へ移動
+			break;
+		case 3:
+			y -= v; //上へ移動
+			break;
+		}
 		break;
-	case 2:
-		y += v; //下へ移動
+	case 2://右へ移動
+		x += v;
 		break;
-	case 3:
-		y -= v; //上へ移動
+	case 3://左へ移動
+		x -= v;
 		break;
 	}
 
