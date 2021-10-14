@@ -307,9 +307,12 @@ void BulletList::calc(int count) {
 		case 0://通常弾
 		case 1://プレイヤーに向かう弾（遅い）
 		case 2://プレイヤーに向かう弾（速い）
-		case 3://放射線状に放たれる弾
 			itr->x += itr->v * cos(rad);//x方向の移動
 			itr->y += itr->v * sin(rad);//y方向の移動
+			break;
+		case 3://放射線状に放たれる弾
+			itr->x += itr->v * (cos(rad) - sin(rad));//x方向の移動
+			itr->y += itr->v * (sin(rad) + cos(rad));//y方向の移動
 			break;
 		}
 		itr->t++;//時間経過
