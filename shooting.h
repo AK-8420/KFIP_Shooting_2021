@@ -11,6 +11,15 @@
 #define PULL -1//キーを離した瞬間
 #define NO_CHANGE 0//それ以外の状態（キー変化なし)
 
+enum Scene {
+	Initialize,//初期化フェーズ
+	Title,
+	Game,
+	GameOver,
+	GameClear,
+	Ending //ゲーム終了処理
+};
+
 namespace COLOR {
 	static const int white = GetColor(255, 255, 255);
 	static const int red = GetColor(255, 0, 0);
@@ -172,3 +181,5 @@ void deleteAllNode(T** head, T** tail);//head-tailのリストのノードをすべて消去
 
 template<typename T>
 int isInSquare(T chara, int min_x, int min_y, int max_x, int max_y);//キャラクターが四角形の範囲の中にいるかチェック
+
+void sceneChange(int toScene, int* nowScene, int* oldScene);// シーン切り替え

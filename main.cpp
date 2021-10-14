@@ -25,6 +25,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	BulletList BList_p;//プレイヤーの弾リスト
 	BulletList BList_e;//敵の弾リスト
 
+	int scene = Game;//現在のシーン
+	int old_scene;//１つ前のシーン
+	int stage = 1;//現在のステージ
+
     /*メインループ*/
 	while (1) {
 		if (ProcessMessage() != 0) {//メッセージ処理
@@ -33,6 +37,34 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		ClearDrawScreen();//画面を消す
 		clsDx();//printfDxで出力した文字列をループごとに消す
 		keys.update();//キーの押下状態を取得
+
+		switch (scene) {
+		case Initialize:
+			break;
+		case Title:
+			break;
+		case Game:
+			//ここにゲームシーンの描画処理を書く
+			//ここにゲームシーンの更新処理を書く
+			switch (stage) {
+			case 1:
+				//ステージ1の敵生成処理
+				break;
+			case 2:
+				//ステージ2の敵生成処理
+				break;
+			}
+			//ここでステージ切り替え判定
+			//ここでシーン切り替え判定
+			break;
+		case GameOver:
+			break;
+		case GameClear:
+			break;
+		}
+		if (scene == Ending) {
+			break;//Mainループ脱出
+		}
 
 		/*以下に描画処理を書く*/
 		p.draw(keys, count);
@@ -61,11 +93,17 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	}
 
 	BList_p.delAll();//プレイヤーの弾をすべて消す
+	BList_e.delAll();//敵の弾をすべて消す
 	DxLib_End(); // DXライブラリ終了処理
 	return 0;
 }
 
 /*以下に関数の定義を書く*/
+void sceneChange(int toScene, int* nowScene, int* oldScene) {
+	*oldScene = *nowScene;//現在のシーンを1つ前のシーンに代入
+	*nowScene = toScene;//現在のシーンを新しいシーンに変更
+}
+
 Graphic::Graphic(const char* FileName, int Width, int Height, int numX, int numY, double ExRate) {
 	filepath = (TCHAR*)malloc(sizeof("graphic/") + sizeof(FileName));
 	strcpyDx(filepath, "graphic/");
