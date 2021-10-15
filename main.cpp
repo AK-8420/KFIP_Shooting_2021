@@ -45,7 +45,19 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			break;
 		case Game:
 			//ここにゲームシーンの描画処理を書く
+			p.draw(keys, count);
+			BList_p.draw();
+			BList_e.draw();
+			Enemys.draw(count);
 			//ここにゲームシーンの更新処理を書く
+			p.update(keys);
+			p.createShot(keys, &BList_p, count);
+			BList_p.calc(count);
+			BList_e.calc(count);
+			Enemys.collision_with_PlayerShot(&BList_p);
+			Enemys.update(&BList_e, p, count);
+			p.collision_with_EnemyShot(&BList_e);
+
 			switch (stage) {
 			case 1:
 				//ステージ1の敵生成処理
@@ -67,20 +79,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		}
 
 		/*以下に描画処理を書く*/
-		p.draw(keys, count);
-		BList_p.draw();
-		BList_e.draw();
-		Enemys.draw(count);
 
 
 		/*以下に更新処理を書く*/
-		p.update(keys);
-		p.createShot(keys, &BList_p, count);
-		BList_p.calc(count);
-		BList_e.calc(count);
-		Enemys.collision_with_PlayerShot(&BList_p);
-		Enemys.update(&BList_e, p, count);
-		p.collision_with_EnemyShot(&BList_e);
 
 		if (count % 30 == 0)
 			Enemys.add(fairy1);
