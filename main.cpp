@@ -74,6 +74,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			if (count == 300)
 				stage = 2;
 			//ここでシーン切り替え判定
+			if (p.HP < 0)
+				sceneChange(Ending, &scene, &old_scene);
 			if (count == 600)
 				sceneChange(GameClear, &scene, &old_scene);
 			break;
@@ -84,6 +86,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			DrawFormatString(CX - GetDrawFormatStringWidth(str) / 2, CY, COLOR::white, str);
 			str = "スペースキーを押すと終了します";
 			DrawFormatString(CX - GetDrawFormatStringWidth(str) / 2, CY + 48, COLOR::white, str);
+
 			//ここでシーン切り替え判定
 			if (keys.getState(KEY_INPUT_SPACE) == PUSH)
 				sceneChange(Ending, &scene, &old_scene);
@@ -164,6 +167,9 @@ void Player::update(KeyInput keys) {
 		x = MAX_X - graph->size_x;
 	else if (x < MIN_X + graph->size_x)//左端を越えている
 		x = MIN_X + graph->size_x;
+
+	if (HP > maxHP)
+		HP = maxHP;//現在HPが最大HPを超えないようにする
 }
 void Player::draw(KeyInput keys, int count) {
 	int frame = (count / 5) % 3; // 5countごとにコマが変化(全部で3コマ)
@@ -448,6 +454,7 @@ void Player::collision_with_EnemyShot(BulletList* b) {
 			(Btwn(y - graph->size_y, itrB->y + itrB->r, y + graph->size_y) ||
 				Btwn(y - graph->size_y, itrB->y - itrB->r, y + graph->size_y))) {
 			itrB = b->del(itrB);//当たっていたら弾を消す
+			HP -= 1;
 		}
 		else {
 			itrB = itrB->next;//進める
