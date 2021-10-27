@@ -61,33 +61,37 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			switch (stage) {
 			case 1:
 				//ステージ1の敵生成処理
+				if (count % 30 == 0)
+					Enemys.add(fairy1);
 				break;
 			case 2:
 				//ステージ2の敵生成処理
+				if (count % 60 == 0)
+					Enemys.add(fairy2);
 				break;
 			}
 			//ここでステージ切り替え判定
+			if (count == 300)
+				stage = 2;
 			//ここでシーン切り替え判定
+			if (count == 600)
+				sceneChange(GameClear, &scene, &old_scene);
 			break;
 		case GameOver:
 			break;
 		case GameClear:
+			const char* str = "GAME CLEAR!";
+			DrawFormatString(CX - GetDrawFormatStringWidth(str) / 2, CY, COLOR::white, str);
+			str = "スペースキーを押すと終了します";
+			DrawFormatString(CX - GetDrawFormatStringWidth(str) / 2, CY + 48, COLOR::white, str);
+			//ここでシーン切り替え判定
+			if (keys.getState(KEY_INPUT_SPACE) == PUSH)
+				sceneChange(Ending, &scene, &old_scene);
 			break;
 		}
 		if (scene == Ending) {
 			break;//Mainループ脱出
 		}
-
-		/*以下に描画処理を書く*/
-
-
-		/*以下に更新処理を書く*/
-
-		if (count % 30 == 0)
-			Enemys.add(fairy1);
-		if (count % 60 == 0)
-			Enemys.add(fairy2);
-
 
 		ScreenFlip();//裏画面を表画面に反映
 		count++;
