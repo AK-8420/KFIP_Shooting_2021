@@ -58,7 +58,7 @@ public:
 	int size_x, size_y;//分割後の画像サイズ(の1/2)
 	double exRate;//画像の拡大率
 
-	Graphic(const char* FileName, int Width, int Height, int numX, int numY, double ExRate = 1);
+	Graphic(const char* FileName, int Width, int Height, int numX = 1, int numY = 1, double ExRate = 1);
 	void draw(int x, int y, int index = 0, double angle = 0);
 	void setExRate(double exRate = 1);
 };
@@ -132,14 +132,16 @@ private:
 	int index_min; //画像のインデックス範囲の最小値
 	int frameSum;  //アニメーションの総コマ数
 public:
+	int score;	   //倒した時に貰えるポイント
 	int moveID;//移動パターンID
 	int shotID;//攻撃パターンID
 
-	Enemy(int X, int Y, int V, Graphic* Image, int Index_min = 0, int FrameSum = 1, int hp = 1, int maxhp = 1, int moveId = 0, int shotId = 1) :Character(X, Y, V, Image, Index_min, hp, maxhp) {
+	Enemy(int X, int Y, int V, Graphic* Image, int Index_min = 0, int FrameSum = 1, int hp = 1, int maxhp = 1, int moveId = 0, int shotId = 1, int Score = 0) :Character(X, Y, V, Image, Index_min, hp, maxhp) {
 		index_min = Index_min;
 		frameSum = FrameSum;
 		moveID = moveId;
 		shotID = shotId;
+		score = Score;
 	}
 	void update();//更新
 	void draw(int count);//描画
@@ -163,7 +165,7 @@ public:
 	void add(Enemy b);//リストの末尾に追加
 	ENode* del(ENode* target);//削除 (戻値：次を指すポインタ)
 	void delAll();//リスト全体を消去
-	void collision_with_PlayerShot(BulletList* b);//プレイヤーの弾との衝突処理
+	void collision_with_PlayerShot(BulletList* b, int* score);//プレイヤーの弾との衝突処理
 };
 
 

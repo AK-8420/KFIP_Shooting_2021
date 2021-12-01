@@ -13,21 +13,28 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	/*ここに初期化処理を書く*/
 	int count = 0;
+	int score = 0;
 	KeyInput keys;//キー入力結果を格納する場所
 
 	Graphic* G_player = new Graphic("player.png", 69, 120, 3, 3);
 	Graphic* G_fairy = new Graphic("fairy.png", 168, 150, 2, 2);
-	Player p(CX, CY + 100, 4, G_player, 3);
-	Enemy fairy1(CX - 200, 0, 4, G_fairy, 0, 2, 1, 1, 4, 1);
-	Enemy fairy2(MIN_X + GetRand(MAX_X - MIN_X), 0, 300, G_fairy, 2, 2, 20, 20, 5, 3);
+	Player p(CX, CY + 100, 4, G_player, 3, 5, 5);
+	Enemy fairy1(CX - 200, 0, 4, G_fairy, 0, 2, 1, 1, 4, 1, 100);
+	Enemy fairy2(MIN_X + GetRand(MAX_X - MIN_X), 0, 300, G_fairy, 2, 2, 20, 20, 5, 3, 500);
 	EnemyList Enemys;//敵リスト
 
 	BulletList BList_p;//プレイヤーの弾リスト
 	BulletList BList_e;//敵の弾リスト
 
-	int scene = Game;//現在のシーン
+	int scene = Title;//現在のシーン
 	int old_scene;//１つ前のシーン
 	int stage = 1;//現在のステージ
+
+	const char* str;
+
+	Graphic G_title_back("title_background.png", 640, 624);
+	Graphic G_title_logo("title_logo.png", 463, 94);
+	int ty = MAX_Y - G_title_back.size_y; //背景画像の初期座標
 
     /*メインループ*/
 	while (1) {
@@ -40,8 +47,34 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 		switch (scene) {
 		case Initialize:
+			Enemys.delAll(); //敵をすべて消去
+			BList_p.delAll();//プレイヤーの弾をすべて消す
+			BList_e.delAll();//敵の弾をすべて消す
+
+			p.x = CX;
+			p.y = CY + 100; // プレイヤーを初期位置に戻す
+			p.HP = p.maxHP; // HP全回復
+
+			count = 0;//経過時間を0に戻す
+			score = 0;//スコアを0に戻す
+			stage = 1;//ステージ1から再開
+			sceneChange(Game, &scene, &old_scene);
 			break;
 		case Title:
+			//描画
+			G_title_back.draw(G_title_back.size_x, ty);
+			G_title_logo.draw(CX, CY - 100);
+			//更新
+			if (ty != G_title_back.size_y) { //背景画像を画像上端につくまで下に移動
+				ty++;
+			}
+			else {
+				str = "－ 何かキーを押してください －";
+				DrawFormatString(CX - GetDrawFormatStringWidth(str) / 2, CY + 48, COLOR::white, str);
+			}
+			//シーン切り替え
+			if (CheckHitKeyAll()) //なんでもいいからキーを押されたら
+				sceneChange(Initialize, &scene, &old_scene); //初期化シーンに移行
 			break;
 		case Game:
 			//ここにゲームシーンの描画処理を書く
@@ -49,12 +82,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			BList_p.draw();
 			BList_e.draw();
 			Enemys.draw(count);
+			DrawFormatString(CX - GetDrawFormatStringWidth("SCORE：%d", score) / 2, MAX_Y - 24, COLOR::white, "SCORE：%d", score);
 			//ここにゲームシーンの更新処理を書く
 			p.update(keys);
 			p.createShot(keys, &BList_p, count);
 			BList_p.calc(count);
 			BList_e.calc(count);
-			Enemys.collision_with_PlayerShot(&BList_p);
+			Enemys.collision_with_PlayerShot(&BList_p, &score);
 			Enemys.update(&BList_e, p, count);
 			p.collision_with_EnemyShot(&BList_e);
 
@@ -74,16 +108,30 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			if (count == 300)
 				stage = 2;
 			//ここでシーン切り替え判定
-			if (p.HP < 0)
-				sceneChange(Ending, &scene, &old_scene);
+			if (p.HP <= 0)
+				sceneChange(GameOver, &scene, &old_scene);
 			if (count == 600)
 				sceneChange(GameClear, &scene, &old_scene);
 			break;
 		case GameOver:
+			str = "GAME OVER...";
+			DrawFormatString(CX - GetDrawFormatStringWidth(str) / 2, CY, COLOR::white, str);
+			str = "Rキーでリトライ";
+			DrawFormatString(CX - GetDrawFormatStringWidth(str) / 2, CY + 30, COLOR::white, str);
+			str = "スペースキーを押すと終了します";
+			DrawFormatString(CX - GetDrawFormatStringWidth(str) / 2, CY + 48, COLOR::white, str);
+
+			//ここでシーン切り替え判定
+			if (keys.getState(KEY_INPUT_R) == PUSH)
+				sceneChange(Initialize, &scene, &old_scene);
+			if (keys.getState(KEY_INPUT_SPACE) == PUSH)
+				sceneChange(Ending, &scene, &old_scene);
 			break;
 		case GameClear:
-			const char* str = "GAME CLEAR!";
+			str = "GAME CLEAR!";
 			DrawFormatString(CX - GetDrawFormatStringWidth(str) / 2, CY, COLOR::white, str);
+			str = "SCORE：%d";
+			DrawFormatString(CX - GetDrawFormatStringWidth(str, score) / 2, CY + 18, COLOR::white, str, score);
 			str = "スペースキーを押すと終了します";
 			DrawFormatString(CX - GetDrawFormatStringWidth(str) / 2, CY + 48, COLOR::white, str);
 
@@ -100,6 +148,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		count++;
 	}
 
+	Enemys.delAll(); //敵をすべて消去
 	BList_p.delAll();//プレイヤーの弾をすべて消す
 	BList_e.delAll();//敵の弾をすべて消す
 	DxLib_End(); // DXライブラリ終了処理
@@ -420,7 +469,7 @@ void EnemyList::delAll() {
 	deleteAllNode(&head, &tail);
 }
 
-void EnemyList::collision_with_PlayerShot(BulletList* b) {
+void EnemyList::collision_with_PlayerShot(BulletList* b, int* score) {
 	ENode* itrE = head;//敵リストの先頭ポインタ
 	Bullet* itrB = b->getHead();//弾リストの先頭ポインタ
 	while (itrE != NULL) {//末尾までポインタを進める
@@ -437,6 +486,7 @@ void EnemyList::collision_with_PlayerShot(BulletList* b) {
 			}
 		}
 		if (itrE->data.HP <= 0) {
+			*score += itrE->data.score;
 			itrE = del(itrE);//HPが0以下になっていたら敵を消す
 		}
 		else {
