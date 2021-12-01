@@ -1,4 +1,3 @@
-//•ÒWF“cãŒc¡, ŸŠÔé—¢
 #include "DxLib.h"
 #include "Shooting.h"
 #include <math.h>
